@@ -1,0 +1,31 @@
+﻿@page "/"
+@* Use a context menu to perform actions *@
+
+<div class="context-menu-target" style="width:auto; height: auto; margin-bottom: 50px;">
+    <TelerikGrid Data="Students"
+                 AutoGenerateColumns="true"
+                 SelectionMode="GridSelectionMode.Multiple"
+                 EditMode="GridEditMode.Popup"
+                 SelectedItemsChanged="@((IEnumerable<Student> students)=>SetSelectedStudents(students))" OnCreate="@CreateHandler" >
+        <GridToolBar>
+            <GridCommandButton Command="Add" Icon="add">Add Student</GridCommandButton>
+        </GridToolBar>
+    </TelerikGrid>
+</div>
+
+<TelerikContextMenu Selector=".context-menu-target" Data="@MenuItems"
+                    TextField="Text" SeparatorField="Separator" IconField="Icon"
+                    OnClick="@( (ContextMenuItem itm) => HandleClick(itm) )">
+</TelerikContextMenu>
+<IndexModal Students="SelectedStudents" 
+            Visibility="ShowModal" 
+            Command="SelectedCommand"
+            ChangeVisibility="OnVisibilityChange"
+             DeleteStudents="OnStudentsDelete"
+            UpdateStudent="OnUpdateStudent">
+
+</IndexModal>
+
+@code{
+
+}

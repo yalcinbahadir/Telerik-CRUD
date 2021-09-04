@@ -1,0 +1,105 @@
+﻿
+<TelerikWindow @bind-Visible="@Visibility">
+    <WindowTitle>
+        <strong>@(Command)</strong>
+    </WindowTitle>
+    <WindowContent>
+        @if (ProcessingStudents?.Count > 0)
+        {
+            if (Command == Command.Delete)
+            {
+                <Telerik.Blazor.Components.TelerikGrid Data="ProcessingStudents" AutoGenerateColumns="true">
+
+                </Telerik.Blazor.Components.TelerikGrid>
+                <div class="mt-2">
+                    <TelerikButton ButtonType="ButtonType.Button" Primary="true" OnClick="Delete">Delete</TelerikButton>
+                    <TelerikButton ButtonType="ButtonType.Button">Cancel</TelerikButton>
+                </div>
+            }
+            else
+            {
+                <TelerikForm Model="Model" Columns="3" ColumnSpacing="25px" OnValidSubmit="HandelValidSubmit">
+                    <FormValidation>
+                        <DataAnnotationsValidator></DataAnnotationsValidator>
+                    </FormValidation>
+
+                </TelerikForm>
+                
+            }
+
+        }
+
+
+    </WindowContent>
+    <WindowActions>
+        <WindowAction Name="Minimize"></WindowAction>
+        <WindowAction Name="Maximize"></WindowAction>
+        <WindowAction Name="Close" OnClick="CloseWindow"></WindowAction>
+    </WindowActions>
+</TelerikWindow>
+
+
+@code{
+    [Parameter]
+    public List<Student> Students { get; set; }
+    public List<Student> ProcessingStudents { get; set; } = new();
+    [Parameter]
+    public EventCallback<bool> ChangeVisibility { get; set; }
+    [Parameter]
+    public EventCallback<int[]> DeleteStudents { get; set; }
+    [Parameter]
+    public EventCallback<Student> UpdateStudent { get; set; }
+    [Parameter]
+    public bool Visibility { get; set; }
+    [Parameter]
+    public Command Command { get; set; }
+    public string Title { get; set; }
+    public Student Model { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        ProcessingStudents = Students;
+        switch (Command)
+        {
+            case Command.Update:
+                Title = "Update Student";
+                Model = ProcessingStudents.FirstOrDefault();
+                break;
+            case Command.Delete:
+                Title = "Delete Student";
+                break;
+            default:
+                break;
+        }
+
+        base.OnParametersSet();
+    }
+
+    private void CloseWindow()
+    {
+        Visibility = !Visibility;
+        ChangeVisibility.InvokeAsync(false);
+    }
+    private void Delete()
+    {
+        Visibility = !Visibility;
+        var idsToDelete = GetIdsToDelete(ProcessingStudents);
+        if (idsToDelete is not null && idsToDelete.Length>0)
+        {
+            DeleteStudents.InvokeAsync(idsToDelete);
+        }
+
+    }
+    public int[] GetIdsToDelete(List<Student> processingStudents)
+    {
+        return processingStudents.Select(s=>s.Id).ToArray();
+    }
+
+    private void HandelValidSubmit()
+    {
+        var test = Model;
+        UpdateStudent.InvokeAsync(Model);
+    }
+
+
+}
